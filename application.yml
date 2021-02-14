@@ -8,12 +8,22 @@ eureka:
     hostname: localhost
     
     
-microservice:
-  payment-service:
-    endpoints:
-      endpoint:
-        uri: http://PAYMENT-SERVICE/payment/doPayment
-  order-service:
-    endpoints:
-      endpoint:
-        uri: http://ORDER-SERVICE/order/bookOrder    
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+      - id: order-service
+        uri: lb://ORDER-SERVICE
+        predicates:
+        - Path=/order/**
+        filters:
+        - RewritePath=/order/(?<path>.*), /$\{path}
+      - id: payment-service
+        uri: lb://payment-service
+        predicates:
+        - Path=/payment/**
+        filters:
+        - RewritePath=/payment/(?<path>.*), /$\{path}
